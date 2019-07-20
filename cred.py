@@ -96,9 +96,8 @@ def getCred():
     setEnv('salt', getSalt())
     
     worker = helper()
-    worker.data =bytes(readFile('cred_hash.txt'), 'utf-8')
-    print(worker.unlock())
-
+    worker.data = bytes(readFile('cred_hash.txt'), 'utf-8')
+    return worker.unlock()
 
 def main():
     #   Setup environment   
