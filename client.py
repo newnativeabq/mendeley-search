@@ -9,23 +9,31 @@ exports returned objects to storage.
 
 @author: vince
 """
-
-from cryptography.fernet import Fernet
-import base64
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-import os
-
+#   Import libraries
 import cred
+from mendeley import Mendeley
 
-def parseCred(creds):
-    cred_list = creds.split(',')
+def startSession():
+    '''
+    Initializes credential flow and returns session object for search
+    '''
+    credentials = cred.getCred()
+    client_id = credentials['client_id']
+    client_secret = credentials['client_secret']
     
-    cred_dict = {}
-    for line in cred_list:
-        cred_dict[line.split(':')[0]] = line.split(':')[1]
-    
-    return cred_dict
+    mendeley = Mendeley(client_id, client_secret=client_secret)
+    auth = mendeley.start_client_credentials_flow()
+    session = auth.authenticate()
+    print('Session open command sent')
+    return session
 
-print(parseCred(cred.getCred()))
+    
+def closeSession(session):
+    session.close()
+    print('Close session command sent')
+    
+
+if __name__ ==  "__main__":
+    mendeley_session = startSession()
+    print(type(mendeley_session))
+

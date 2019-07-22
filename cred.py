@@ -14,6 +14,7 @@ Created on Sat Jul 20 12:19:48 2019
 
 @author: vince
 """
+#   Import libraries
 from cryptography.fernet import Fernet
 import base64
 from cryptography.hazmat.backends import default_backend
@@ -97,7 +98,18 @@ def getCred():
     
     worker = helper()
     worker.data = bytes(readFile('cred_hash.txt'), 'utf-8')
-    return worker.unlock()
+    
+    def parseCred(creds):
+        cred_list = creds.split(',')
+        
+        cred_dict = {}
+        for line in cred_list:
+            cred_dict[line.split(':')[0]] = line.split(':')[1]
+        
+        return cred_dict
+    
+    return parseCred(worker.unlock())
+
 
 def main():
     #   Setup environment   
