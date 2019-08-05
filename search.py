@@ -8,41 +8,74 @@ Search mendeley catalog for queries in search list.
 """
 # Import libraries
 import pandas as pd
+import os
+
 import client
+
+# Debug functions
 
 def searchMendeley(query, session=None, close ='yes'):
     '''
     Searches mendeley catalog with given query term on existing session.
     Session must be authenticated with startSession() prior.
-    Returns an iterable catalog search object
+    Returns an iterable catalog search object and the session object search, session 
     '''
     if session == None:
         session = client.startSession()
+        
+    search = session.catalog.search(query=query, view='all').iter()
     
-    search = session.catalog.search(query=query).iter()
+    if (close == 'yes') and (session != None):
+        client.closeSession(session)
     
-    if close == 'yes':
-        client.closeSession()
-    
-    return search
+    return search, session
 
-def listSearchFiles(search_obj, num_records=5):
+def getFiles(doc_obj):
     '''
-    Takes iterable search_obj and iterates through num_records count of 
-    Mendeley document objects and capture file information.
+    Takes a single mendeley.catalog.doc object obtained in catalog.search.
+    Returns an iterable files object that can be searched for files
     
-    Returns list of XXXX
+    Returns list of file_names
     '''
-    for count, item in enumerate(search_obj):
-        if count > 5:
+    
+    # Create a files iterator
+    files = doc_obj.files
+    
+    def checkFiles(file_iter):
+        '''
+        Iterate through mendeley.resources.files.Files object and report information.
+        ** Having activity scoped here allows try statement to pick up on API errors.
+        '''
+        for count, file in enumerate(file_iter):
+            print(count)
+            return count
+    
+    try:
+        checkFiles(files)
+    except:
+        print('File Search Failed')
+    
+    return files
+
+
+def buildSearchDict(search_obj, num_docs=10):
+    '''
+    Takes a mendeley.catalog.search object and returns a dictionary of
+    documents and file objects.
+    '''
+    search_dict = {}
+    for count, doc in enumerate(search_obj):
+        print('checking document', count, ':', doc.file_attached)
+        if count >= num_docs:
             break
-        else:
-            for x in item.files.iter():
-                try:
-                    print(x.file_name)
-                except MendeleyApiException:
-                    print('No files found or error')
-                except:
-                    print('unknown error has occured')
-                    
+        if not doc.file_attached:
+            search_dict[type(doc)] = doc.file_attached
+    return search_dict
+        
+        
+        
+        
+        
+        
+        
         
